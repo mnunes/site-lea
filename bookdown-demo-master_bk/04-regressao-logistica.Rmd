@@ -1,0 +1,21 @@
+# Regressão Logística {-#regressaologistica}
+
+Texto sobre regressão logística.
+
+```{r regressaologistica01}
+mydata <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+mydata$rank <- factor(mydata$rank)
+
+mylogit <- glm(admit ~ gre, 
+               data = mydata, 
+               family = "binomial")
+
+summary(mylogit)
+
+library(ggplot2)
+theme_set(theme_bw())
+
+ggplot(mydata, aes(x = gre, y = admit)) +
+  geom_point() + 
+  geom_smooth(method = "glm")
+```

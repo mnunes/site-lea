@@ -1,0 +1,29 @@
+--- 
+title: "Tutoriais de Estatística"
+author: "Laboratório de Estatística Aplicada"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "Página com tutoriais de métodos estatísticos em R produzidos pelos alunos do Departamento de Estatística da UFRN."
+---
+
+# Apresentação {-#apresentacao}
+
+Essa página é uma iniciativa do [Laboratório de Estatística Aplicada](lea.estatistica.ccet.ufrn.br/) do [Departamento de Estatística da UFRN](https://sigaa.ufrn.br/sigaa/public/departamento/portal.jsf?id=47). Nessa página é possível encontrar tutoriais em R para diversos métodos estatísticos no R.
+
+Coordenação:
+
+* [Carla A. Vivacqua](https://sigaa.ufrn.br/sigaa/public/docente/portal.jsf?siape=1218831)
+* [Marcus Nunes](https://marcusnunes.me)
+* Talita Barros
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

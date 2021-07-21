@@ -1,0 +1,14 @@
+# Regressao Linear Múltipla {-#regressaolinearmultipla}
+
+Alguma coisa sobre esse assunto.
+
+$$y_i = \beta_0 + \beta_1x_{1i} + \cdots + \beta_px_{pi} + \varepsilon_i$$
+
+```{r regressaolinearmultipla01}
+ajuste <- lm(Petal.Width ~ Petal.Length + Sepal.Width + Sepal.Length, 
+             data = iris)
+summary(ajuste)
+```
+
+
+

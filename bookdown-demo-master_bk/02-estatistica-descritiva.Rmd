@@ -1,0 +1,12 @@
+# Estatística Descritiva {-#estatisticadescritiva}
+
+Técnicas de visualização de dados.
+
+```{r estatisticadescritiva01}
+library(ggplot2)
+theme_set(theme_bw())
+
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_wrap(~ class, ncol = 2)
+```

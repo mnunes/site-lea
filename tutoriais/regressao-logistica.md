@@ -13,20 +13,7 @@ output:
 \renewcommand\tablename{Tabela}
 \renewcommand\figurename{Figura}
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-	echo = TRUE,
-	fig.pos = "H",
-	warning = FALSE,
-	dev = "png",
-	dpi = 300,
-	loadings = F
-)
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
-```
+
 
 # Introdução 
 
@@ -227,24 +214,26 @@ As fórmulas utilizadas podem ser encontradas em @Hosmer2013 e @silva2016.
 
 O banco de dados escolhido para este tutorial está presente no pacote **aplore3** e é chamado **lowbwt**. Esse conjunto de dados contém 11 variáveis referentes a 189 partos de mulheres atendidas numa clínica obstétrica e pode ser chamado pelo seguinte comando
 
-```{r banco, warning = F}
+
+```r
 library(aplore3)
 data(lowbwt)
 ```
 A Tabela abaixo mostra as 4 variáveis de interesse para a regressão logística, sendo **low** a variável resposta, **age** e **lwt** covariáveis preditoras numéricas e **smoke** uma covariável preditora (fator).
 
-```{r tabela, echo = F}
-Variavel = c("low", "age", "lwt", "smoke")
-Significado = c("Indicador de peso baixo ao nascer (1: > =  2500g, 2: < 2500g).", 
-      "Idade da mãe em anos.", "Peso da mãe no último período menstrual em libras.", "Indicador de fumo durante a gravidez (1: Não, 2: Sim).")
-tabela = matrix(c(Variavel, Significado), nrow = 4)
-knitr::kable(tabela, col.names = c("Variável", "Significado"))
-```
+
+|Variável |Significado                                                    |
+|:--------|:--------------------------------------------------------------|
+|low      |Indicador de peso baixo ao nascer (1: > =  2500g, 2: < 2500g). |
+|age      |Idade da mãe em anos.                                          |
+|lwt      |Peso da mãe no último período menstrual em libras.             |
+|smoke    |Indicador de fumo durante a gravidez (1: Não, 2: Sim).         |
 
 
 A Figura \@ref(fig:idade) mostra os boxplots das idades das mães pelo peso do bebê. É possível perceber que não há muita diferença entre os dois grupos, indicando que, provavelmente, a idade da mãe não deve ser significativa no modelo.
 
-```{r idade, fig.cap = "Gráfico da idade pelo peso do bebê ao nascer."}
+
+```r
 library(ggplot2)
 ggplot(data = lowbwt, aes(x = low, y = age)) + 
   geom_boxplot() + 
@@ -252,27 +241,61 @@ ggplot(data = lowbwt, aes(x = low, y = age)) +
   theme_bw()
 ```
 
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/idade-1.png" alt="Gráfico da idade pelo peso do bebê ao nascer."  />
+<p class="caption">(\#fig:idade)Gráfico da idade pelo peso do bebê ao nascer.</p>
+</div>
+
 
 O segundo gráfico, presente na Figura \@ref(fig:lwt), ilustra os boxplots do peso da mãe em libras pelo peso do bebê ao nascer. É possível perceber que o peso das mães que tiveram filhos mais pesados tende a ser levemente maior.
 
-```{r lwt, fig.cap = "\\label{fig:lwt} Gráfico da idade pelo peso do bebê ao nascer."}
+
+```r
 ggplot(data = lowbwt, aes(x = low, y = lwt)) + 
   geom_boxplot() + 
   labs(x = "Peso do bebê", y = "Peso da mãe (libras)") + 
   theme_bw()
 ```
 
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/lwt-1.png" alt="\label{fig:lwt} Gráfico da idade pelo peso do bebê ao nascer."  />
+<p class="caption">(\#fig:lwt)\label{fig:lwt} Gráfico da idade pelo peso do bebê ao nascer.</p>
+</div>
+
 A tabela a seguir mostra o indicador de se mãe fumou pelo peso do bebê. É possível notar que, dentre as mães que não fumaram, o peso dos bebês tende a ser maior que 2500 g, já dentre as que fumaram, a proporção de bebês mais leves aumenta.
 
-```{r smoke}
+
+```r
 table(lowbwt$smoke, lowbwt$low)
+```
+
+```
+##      
+##       >= 2500 g < 2500 g
+##   No         86       29
+##   Yes        44       30
 ```
 
 Transformando todas as variáveis binárias para torná-las variáveis **dummies** (0 para não e 1 para sim). É importante verificar se as variáveis fatores estão realmente como fatores, já que muitas vezes elas aparecem como numéricas. Para isso, é necessário usar o comando **class**, caso elas não estejam, uma das maneiras de transformá-las em fatores é com a função **as.factor**.
 
-```{r dummy}
+
+```r
 class(lowbwt$low)
+```
+
+```
+## [1] "factor"
+```
+
+```r
 class(lowbwt$smoke)
+```
+
+```
+## [1] "factor"
+```
+
+```r
 levels(lowbwt$low) = c(0, 1)
 levels(lowbwt$smoke) = c(0, 1)
 ```
@@ -283,44 +306,192 @@ levels(lowbwt$smoke) = c(0, 1)
 
 Neste tutorial será mostrado como estimar a probabilidade de um bebê ter um peso menor que 2500 g ao nascer, a partir da idade da mãe, do peso dela no último período menstrual e se ela fumou durante a gravidez. O comando geral para a regressão logística é a partir da função **glm** usando o argumento **family = binomial**, que por *default* usa a função de ligação logito. O primeiro passo será calcular apenas a probabilidade de um bebê nascer com peso baixo a partir da idade da mãe.
 
-```{r logidade}
+
+```r
 (ajuste1 <- glm(low ~ age, family = binomial, data = lowbwt))
+```
+
+```
+## 
+## Call:  glm(formula = low ~ age, family = binomial, data = lowbwt)
+## 
+## Coefficients:
+## (Intercept)          age  
+##     0.38458     -0.05115  
+## 
+## Degrees of Freedom: 188 Total (i.e. Null);  187 Residual
+## Null Deviance:	    234.7 
+## Residual Deviance: 231.9 	AIC: 235.9
 ```
 
 Aplicando a função **summary** para verificar a significância do modelo, tem-se
 
-```{r logidsum}
+
+```r
 summary(ajuste1)
+```
+
+```
+## 
+## Call:
+## glm(formula = low ~ age, family = binomial, data = lowbwt)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0402  -0.9018  -0.7754   1.4119   1.7800  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)
+## (Intercept)  0.38458    0.73212   0.525    0.599
+## age         -0.05115    0.03151  -1.623    0.105
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 234.67  on 188  degrees of freedom
+## Residual deviance: 231.91  on 187  degrees of freedom
+## AIC: 235.91
+## 
+## Number of Fisher Scoring iterations: 4
 ```
 Considerando um nível de 5\% de significância, a idade da mãe não influencia no modelo, já que seu p-valor é igual a 0, 105 para testar a hipótese de que o respectivo parâmetro é igual a zero, usando a estatística de Wald. Repetindo o processo com o peso da mãe, tem-se
 
-```{r logpeso}
+
+```r
 ajuste2 <- glm(low ~ lwt, family = binomial, data = lowbwt)
 summary(ajuste2)
 ```
 
+```
+## 
+## Call:
+## glm(formula = low ~ lwt, family = binomial, data = lowbwt)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0951  -0.9022  -0.8018   1.3609   1.9821  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)  
+## (Intercept)  0.99831    0.78529   1.271   0.2036  
+## lwt         -0.01406    0.00617  -2.279   0.0227 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 234.67  on 188  degrees of freedom
+## Residual deviance: 228.69  on 187  degrees of freedom
+## AIC: 232.69
+## 
+## Number of Fisher Scoring iterations: 4
+```
+
 Considerando 5\% de significância, a estatística Wald mostra que o peso da mãe é significativo para o modelo ($p = 0.0227$) e possui valor negativo. O terceiro ajuste usa a variável indicadora de fumo da mãe durante o parto.
 
-```{r logfumo}
+
+```r
 ajuste3 <- glm(low ~ smoke, family = binomial, data = lowbwt)
 summary(ajuste3)
 ```
 
+```
+## 
+## Call:
+## glm(formula = low ~ smoke, family = binomial, data = lowbwt)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.0197  -0.7623  -0.7623   1.3438   1.6599  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)  -1.0871     0.2147  -5.062 4.14e-07 ***
+## smoke1        0.7041     0.3196   2.203   0.0276 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 234.67  on 188  degrees of freedom
+## Residual deviance: 229.80  on 187  degrees of freedom
+## AIC: 233.8
+## 
+## Number of Fisher Scoring iterations: 4
+```
+
 Nesse caso, as mães fumantes apresentam uma probabilidade de ter um filho mais leve maior que as não fumantes ($p = 0.0276$). Por fim, será realizado o ajuste com as duas variáveis que foram significativas
 
-```{r logtodas}
+
+```r
 ajuste4 <- glm(low ~ lwt + smoke, family = binomial, data = lowbwt)
 summary(ajuste4)
 ```
 
+```
+## 
+## Call:
+## glm(formula = low ~ lwt + smoke, family = binomial, data = lowbwt)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.2487  -0.8459  -0.7374   1.2491   2.0808  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)  
+## (Intercept)  0.62200    0.79592   0.781   0.4345  
+## lwt         -0.01332    0.00609  -2.188   0.0287 *
+## smoke1       0.67667    0.32470   2.084   0.0372 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 234.67  on 188  degrees of freedom
+## Residual deviance: 224.34  on 186  degrees of freedom
+## AIC: 230.34
+## 
+## Number of Fisher Scoring iterations: 4
+```
+
 A partir dessa saída, pode-se concluir que as probabilidades ajustadas de ter um filho com menor peso terão intercepto nulo ($p = 0.4345$), serão decrescentes conforme o peso da mãe aumenta ($p = 0.0287$) e aumentam se a mãe é fumante ($p = 0.0372$). A seguir, será utilizada a tabela ANOVA com testes da máxima verossimilhança para verificar a significância do modelo completo.
 
-```{r anova}
+
+```r
 anova(ajuste4, test = "Chisq")
 ```
+
+```
+## Analysis of Deviance Table
+## 
+## Model: binomial, link: logit
+## 
+## Response: low
+## 
+## Terms added sequentially (first to last)
+## 
+## 
+##       Df Deviance Resid. Df Resid. Dev Pr(>Chi)  
+## NULL                    188     234.67           
+## lwt    1   5.9813       187     228.69  0.01446 *
+## smoke  1   4.3500       186     224.34  0.03701 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
 Considerando ainda um nível de $5\%$ de significância, o modelo com as variáveis **lwt** e **smoke** mostrou-se significativo. É possível também criar um intervalo de confiança para as estimativas a partir da funçaõ **confint**.
-```{r ic, warning = F}
+
+```r
 cbind(Estimativa = coef(ajuste4), confint(ajuste4))
+```
+
+```
+## Waiting for profiling to be done...
+```
+
+```
+##              Estimativa       2.5 %       97.5 %
+## (Intercept)  0.62199682 -0.88316262  2.254747549
+## lwt         -0.01332433 -0.02607485 -0.002048779
+## smoke1       0.67667325  0.04086881  1.317358561
 ```
 Como pode-se perceber, o intervalo de confiança do intercepto contém o número 0, o que corrobora com a evidência de sua nulidade.
 A probabilidade de a $i$-ésima mãe ter um filho com peso menor que 2500 g pode ser descrita como
@@ -332,7 +503,8 @@ $$\pi (\mathbf{x}_i) = \frac{\exp(-0.0133\times lwt + 0.6767\times smoke)}{1 + \
 
 O primeiro passo para a análise de resíduos é a obtenção dos resíduos de Pearson para calcular a estatística de Pearson. Na Figura \@ref(fig:resp) é possível perceber que apenas um resíduo teve módulo maior que 2, indicando que, no geral, os resíduos estão bem comportados. Além disso, é possível perceber uma massa de pontos superior a 0, indicando os resíduos das mães que tiveram um filho com peso maior que 2500 g (**low** = 1) e uma segunda massa de pontos, indicando os resíduos das mães que tiveram filho com menor peso (**low** = 0). Entretanto, esse comportamento ocorreu devido à organização do banco de dados. Muitos bancos de dados apresentam resíduos se comportando conforme a Figura \@ref(fig:resp2).
 
-```{r resp, fig.cap = "\\label{fig:resp}Gráfico dos Resíduos de Pearson"}
+
+```r
 resp <- data.frame(indice = 1:nrow(lowbwt),
                    residuos = residuals(ajuste4, type = "pearson"))
 
@@ -342,22 +514,39 @@ ggplot(resp, aes(x = indice, y = residuos)) +
   labs(x = "Índice", y = "Resíduos")
 ```
 
-```{r resp2, fig.cap = "\\label{fig:resp2}Gráfico dos Resíduos de Pearson sem a organização do banco de dados"}
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/resp-1.png" alt="\label{fig:resp}Gráfico dos Resíduos de Pearson"  />
+<p class="caption">(\#fig:resp)\label{fig:resp}Gráfico dos Resíduos de Pearson</p>
+</div>
+
+
+```r
 ggplot(resp, aes(x = sample(indice), y = residuos)) +
   geom_point() +
   geom_hline(yintercept = 0) +
   labs(x = "Índice", y = "Resíduos")
 ```
 
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/resp2-1.png" alt="\label{fig:resp2}Gráfico dos Resíduos de Pearson sem a organização do banco de dados"  />
+<p class="caption">(\#fig:resp2)\label{fig:resp2}Gráfico dos Resíduos de Pearson sem a organização do banco de dados</p>
+</div>
+
 O p-valor da estatística qui-quadrado de Pearson para o ajuste do modelo pode ser calculada pelo comando
 
-```{r spearson}
+
+```r
 pchisq(sum(resp$residuos^2), df = ajuste4$df.residual, lower.tail = F)
+```
+
+```
+## [1] 0.4577639
 ```
 
 Como a hipótese nula desse teste é de adequação do modelo, considerando um nível de confiança de 5\%, não foi rejeitada tal hipótese, portanto, pode-se garantir que o modelo esteja adequado. Outra forma de teste de ajuste é pelos resíduos *Deviance*. A forma de obtenção é similar à obtenção dos resíduos de Pearson e seu gráfico pode ser visto na Figura \@ref(fig:resd) e, assim como no caso anterior, apenas um resíduo teve módulo maior que 2.
 
-```{r resd, fig.cap = "\\label{fig:resd}Gráfico dos Resíduos Deviance"}
+
+```r
 resd <- data.frame(indice = 1:nrow(lowbwt),
                    residuos = residuals(ajuste4))
 
@@ -367,10 +556,20 @@ ggplot(resp, aes(x = indice, y = residuos)) +
   labs(x = "Índice", y = "Resíduos")
 ```
 
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/resd-1.png" alt="\label{fig:resd}Gráfico dos Resíduos Deviance"  />
+<p class="caption">(\#fig:resd)\label{fig:resd}Gráfico dos Resíduos Deviance</p>
+</div>
+
 O p-valor do teste para os resíduos deviance é realizando também utilizando a função **pchisq**:
 
-```{r sdeviance}
+
+```r
 pchisq(sum(resd$residuos^2), df = ajuste4$df.residual, lower.tail = F)
+```
+
+```
+## [1] 0.02873728
 ```
 
 Nesse caso, considerando um nível de significância de 5\%, a hipótese de adequação do modelo é rejeitada.
@@ -379,26 +578,73 @@ Nesse caso, considerando um nível de significância de 5\%, a hipótese de adeq
 
 Para a matriz de confusão é necessário usar a função **predict** e utilizar um critério de separação. Nesse caso, será utilizado 0.3 como critério, ou seja, se a probabilidade ajustada for maior que 0.3, será considerado que tal mãe teve um filho com menor peso, caso contrário, será considerado que tal mãe teve um filho com maior peso.
 
-```{r predicao}
+
+```r
 predicao = predict(ajuste4, type = "response")
 table(lowbwt$low, predicao>0.3)
 ```
 
+```
+##    
+##     FALSE TRUE
+##   0    78   52
+##   1    20   39
+```
+
 Nesse caso, a especificidade foi de 0.661 e a sensitividade foi de 0.6. Para a curva ROC é necessário utilizar o pacote **pROC** disponível no *CRAN*. A função utilizada é a **plot.roc**, na qual é necessário inserir a variável resposta e os dados ajustados. A Figura \@ref(fig:roc) mostra a curva ROC padrão do pacote e a Figura \@ref(fig:roc2) mostra a curva ROC com algumas alterações visuais. O *AUC: 0.640* representa a área abaixo da curva, que teve um valor baixo, indicando que o ajuste não é muito bom em termos de predição.
-```{r roc, fig.cap = "\\label{fig:roc} Curva ROC do modelo ajustado", fig.pos = "H"}
+
+```r
 library(pROC)
+```
 
+```
+## Type 'citation("pROC")' for a citation.
+```
+
+```
+## 
+## Attaching package: 'pROC'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     cov, smooth, var
+```
+
+```r
 curva_roc <- roc(lowbwt$low, fitted(ajuste4))
+```
 
+```
+## Setting levels: control = 0, case = 1
+```
+
+```
+## Setting direction: controls < cases
+```
+
+```r
 ggroc(curva_roc) +
   labs(x = "Especificidade", y = "Sensitividade")
 ```
 
-```{r roc2, fig.cap = "\\label{fig:roc2} Curva ROC do modelo ajustado", fig.pos = "H"}
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/roc-1.png" alt="\label{fig:roc} Curva ROC do modelo ajustado"  />
+<p class="caption">(\#fig:roc)\label{fig:roc} Curva ROC do modelo ajustado</p>
+</div>
+
+
+```r
 plot(curva_roc, print.auc=TRUE, auc.polygon=TRUE, grid=c(0.1, 0.2),
       max.auc.polygon=TRUE, auc.polygon.col="cyan",
      xlab="Especificidade", ylab="Sensitividade")
 ```
+
+<div class="figure">
+<img src="regressao-logistica_files/figure-html/roc2-1.png" alt="\label{fig:roc2} Curva ROC do modelo ajustado"  />
+<p class="caption">(\#fig:roc2)\label{fig:roc2} Curva ROC do modelo ajustado</p>
+</div>
 
 \newpage
 
@@ -418,8 +664,14 @@ $$\log \left[\frac{\Omega(x_j = ``A")}{\Omega(x_j = ``B")}\right] = \beta_j,$$
 
 em que $A$ e $B$ indicam, respectivamente, a categoria mostrada na saída do **glm** e a categoria base. Nesse caso, a razão de chances entre o grupo de fumantes e o de não fumantes é de $\exp(0.6767) = 1.9673$, indicando um aumento. A razão de chances pode ser calculada a partir do comando
 
-```{r rc}
+
+```r
 exp(coef(ajuste4))
+```
+
+```
+## (Intercept)         lwt      smoke1 
+##    1.862644    0.986764    1.967322
 ```
 
 # Referências

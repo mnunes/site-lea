@@ -246,10 +246,11 @@ A Figura \@ref(fig:idade) mostra os boxplots das idades das mães pelo peso do b
 
 ```{r idade, fig.cap = "Gráfico da idade pelo peso do bebê ao nascer."}
 library(ggplot2)
+theme_set(theme_bw())
+
 ggplot(data = lowbwt, aes(x = low, y = age)) + 
   geom_boxplot() + 
-  labs(x = "Peso do bebê", y = "Idade") + 
-  theme_bw()
+  labs(x = "Peso do bebê", y = "Idade")
 ```
 
 
@@ -258,8 +259,7 @@ O segundo gráfico, presente na Figura \@ref(fig:lwt), ilustra os boxplots do pe
 ```{r lwt, fig.cap = "\\label{fig:lwt} Gráfico da idade pelo peso do bebê ao nascer."}
 ggplot(data = lowbwt, aes(x = low, y = lwt)) + 
   geom_boxplot() + 
-  labs(x = "Peso do bebê", y = "Peso da mãe (libras)") + 
-  theme_bw()
+  labs(x = "Peso do bebê", y = "Peso da mãe (libras)")
 ```
 
 A tabela a seguir mostra o indicador de se mãe fumou pelo peso do bebê. É possível notar que, dentre as mães que não fumaram, o peso dos bebês tende a ser maior que 2500 g, já dentre as que fumaram, a proporção de bebês mais leves aumenta.

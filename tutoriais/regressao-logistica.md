@@ -235,10 +235,11 @@ A Figura \@ref(fig:idade) mostra os boxplots das idades das mães pelo peso do b
 
 ```r
 library(ggplot2)
+theme_set(theme_bw())
+
 ggplot(data = lowbwt, aes(x = low, y = age)) + 
   geom_boxplot() + 
-  labs(x = "Peso do bebê", y = "Idade") + 
-  theme_bw()
+  labs(x = "Peso do bebê", y = "Idade")
 ```
 
 <div class="figure">
@@ -253,8 +254,7 @@ O segundo gráfico, presente na Figura \@ref(fig:lwt), ilustra os boxplots do pe
 ```r
 ggplot(data = lowbwt, aes(x = low, y = lwt)) + 
   geom_boxplot() + 
-  labs(x = "Peso do bebê", y = "Peso da mãe (libras)") + 
-  theme_bw()
+  labs(x = "Peso do bebê", y = "Peso da mãe (libras)")
 ```
 
 <div class="figure">

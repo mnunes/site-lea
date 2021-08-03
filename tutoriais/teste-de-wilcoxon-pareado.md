@@ -1,0 +1,258 @@
+---
+title: "Teste de Wilcoxon Pareado"
+author: "Francisco Caninde Assis de Oliveira e Ana Luzielma Dias Campos"
+date: "3 de Agosto de 2021"
+output: 
+  bookdown::html_document2:
+    keep_md: true
+---
+
+
+
+# Objetivo
+
+Este trabalho tem como finalidade fazer um tutorial detalhado sobre o teste não-paramétrico de Wilcoxon pareado, apresentando sua definição, objetivo e aplicação usando o R.
+
+
+# Introdução
+
+Desenvolvido por F. Wilcoxon em 1945, o teste de Wilcoxon pareado baseia-se nos postos das diferenças intrapares. Este teste não-paramétrico, usado para comparar amostras relacionadas, é uma alternativa para o teste t-Student quando as amostras não seguem distribuição normal. Portanto, o teste de Wilcoxon é usado para testar se as medianas das amostras são iguais nos casos em que a suposição de normalidade não é satisfeita ou quando não for possível checar essa suposição.
+
+# Procedimento
+
+Considere que $Xi$ representa os escores da amostra 1 e $Yi$ os escores da amostra 2. Primeiramente são calculadas as diferenças de cada par de escores, ou seja, $di = Xi–Yi$. Após o cálculo das diferenças atribuem-se postos às diferenças dos escores em valor absoluto, $\mid d_i\mid$. A menor diferença em valor absoluto receberá o posto 1, a segunda menor diferença em valor absoluto receberá o posto 2 e assim por diante. Depois, acrescenta-se o sinal das diferenças, $di$, aos postos.
+
+Sob a hipótese nula ($H_0$), a soma dos postos positivos “+” e a soma dos postos negativos “-“ devem ser aproximadamente iguais, indicando que não existe diferença entre as medianas dos tratamentos, se as somas não forem aproximadamente iguais pode-se dizer que as medianas dos tratamentos são diferentes ou que as amostras vêm de populações com medianas diferentes, rejeitando-se $H_0$. 
+
+Os empates podem ocorrer de duas maneiras: quando a diferença dos escores $X$ e $Y$ for 0 (zero), ou seja $\mid d_i\mid$ $ = 0$, retira-se o par da análise. Quando houver diferenças em valor absoluto, $\mid d_i\mid$, iguais, atribuem-se à essas diferenças a média dos postos que elas receberiam se não fossem empatadas e depois acrescentam-se aos postos os sinais das diferenças. Por exemplo, suponha que as menores diferenças entre os escores são $d_1$ = 1, $d_2$ = -1 e $d_3$ = -1, essas diferenças em valor absoluto são: $\mid d_1\mid$ = 1, $\mid d_2\mid$ = 1 e $\mid d_3\mid$ =  1, o posto 2 seria atribuído à cada uma das três diferenças, pois a média de 1, 2 e 3 é 2. Assim os postos com os sinais das diferenças são: 2, -2 e -2. A próxima diferença na ordem receberia o posto 4 e assim por diante. 
+
+As hipóteses: $H_0$: não existe diferença entre os tratamentos, ou os dados provêm de populações de mesma mediana, ou 
+
+\begin{align*}
+H_0 &: \sum{p_i\left(+\right) = \sum{p_i\left(-\right)}} \\
+H_1 &: \mbox{existe diferença entre os tratamentos, ou os dados não provêm de populações de mesma mediana, ou} \\
+H_1 &: \sum{p_i\left(+\right)\neq\sum{p_i\left(-\right)}} \\
+&\mbox{ou} \\
+&\sum{p_i\left(+\right)>\sum{p_i\left(-\right)}} \\
+&\mbox{ou} \\
+&\sum{p_i\left(+\right)<\sum{p_i\left(-\right)}}.
+\end{align*}
+
+O teste de Wilcoxon pode ser aplicado à pequenas e grandes amostras.
+
+
+## Para pequenas amostras $n \le 20$
+
+Quando se têm amostras com tamanho $n \le\ 20$, utiliza-se a estatística do teste:
+  
+$$V  = \sum_{i = 1}^{m}p_i^+$$
+em que $m$ = número de $d_i^+s$ (positivos) e $p_i^+$ = posto(ordem) de $\mid d_i\mid$ positivo.
+
+## Para grandes amostras $n>20$
+
+Quando $n>20$, pode-se utilizar a aproximação da distribuição dos valores críticos de V pela distribuição Normal. Nesse caso, a soma dos postos V, tem distribuição aproximadamente normal com média:
+
+$$\mu_0(V) = \frac{n(n+1)}{4}$$ 
+e desvio padrão:
+$$\sigma_0(V) = \sqrt{\frac{n(n+1)(2n+1))}{24}}$$
+A estatística do teste é dada por:
+
+$$Z_v = \frac{V-\frac{n(n+1)}{4}}{\sqrt{\frac{n(n+1)(2n+1)}{24}}}\sim N(0,1)$$
+
+Como V é uma variável aleatória discreta, deve-se usar a correção de continuidade. Portanto, a estatística do teste é dada por: 
+
+$$Z_v = \frac{(v\pm 0,5)-\frac{n(n+1)}{4}}{\sqrt{\frac{n(n+1)(2n+1)}{24}}}$$
+
+# Aplicação
+
+## Para $n \le 20$
+
+Amostra pequena: Os dados a seguir fazem parte de uma amostra de tamanho $n = 11$, usada por William S. Gosset para ilustrar sua análise no artigo “The probable error of an average” (O erro provável de uma média) (1908). Esses dados se referem ao resultado da semeadura em 11 diferentes lotes com dois tipos de sementes, normal e seca em estufa. Acreditava-se que secar a semente antes do plantio aumentaria o rendimento das plantas. Os dados são mostrados abaixo: 
+
+
+```r
+# importando os dados
+
+library(readxl)
+seed <- read_excel("dados/seed.xls")
+
+dados_seed <-  dados <- data.frame(Semente = c(rep("Normal", 11), rep("Seco",11)),Rendimento = c(seed$`Regular seed`,seed$`Kiln-dried seed`))
+
+Seca <- dados_seed[dados_seed$Semente == "Seco",]
+
+Normal <- dados_seed[dados_seed$Semente == "Normal",]
+
+completo <- data.frame(Normal,Seca)
+completo
+```
+
+```
+##    Semente Rendimento Semente.1 Rendimento.1
+## 1   Normal       1903      Seco         2009
+## 2   Normal       1935      Seco         1915
+## 3   Normal       1910      Seco         2011
+## 4   Normal       2496      Seco         2463
+## 5   Normal       2108      Seco         2180
+## 6   Normal       1961      Seco         1925
+## 7   Normal       2060      Seco         2122
+## 8   Normal       1444      Seco         1482
+## 9   Normal       1612      Seco         1542
+## 10  Normal       1316      Seco         1443
+## 11  Normal       1511      Seco         1535
+```
+
+Antes de seguir para o procedimento do teste no R, será feito uma breve análise descritiva dos dados,com o intuito de verificar visualmente se o rendimento mediano das sementes secas possam ser maior que o rendimento mediano das sementes normais.
+
+
+
+
+```r
+Tabela
+```
+
+```
+##        Mediana Media Desvio Padrão
+## Seca      1925  1875        332.85
+## Normal    1910  1841        342.74
+```
+
+
+
+```r
+library(tidyverse)
+library(gridExtra)
+
+ggplot(dados_seed, aes(x = Semente, y = Rendimento)) +
+  geom_boxplot() +
+  labs(x = "Semente", y = "Rendimento", title = "Boxplot para o rendimento dos tipos de sementes") +
+  theme_bw()
+```
+
+![](teste-de-wilcoxon-pareado_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+
+Com base nas estatísticas descritivas percebe-se que o rendimento mediano das sementes secas é levemente maior, porém não é concretizado.
+
+## Teste de Hipóteses
+
+As hipóteses são:
+
+$H_0$ : O rendimento mediano da semente do tipo seca é igual ao rendimento mediano do tipo normal
+
+$H_1$ : O rendimento mediano da semente do tipo seca é maior que o rendimento mediano da semente do tipo normal
+
+A seguir, será feito o teste no R usando o comando "wilcox.test". Dentro do comando, devemos informar ao R o primeiro banco de dados sem o tratamento e o segundo com o tratamento, se é pareado, hipótese alternativa e o nível de significância (pré-estabelecido é 5%). O teste será mostrado abaixo:
+
+
+```r
+teste <- wilcox.test(Normal$Rendimento,Seca$Rendimento,paired = T,alternative = "less", conf.level = 0.95)
+teste
+```
+
+```
+## 
+## 	Wilcoxon signed rank exact test
+## 
+## data:  Normal$Rendimento and Seca$Rendimento
+## V = 15, p-value = 0.06152
+## alternative hypothesis: true location shift is less than 0
+```
+
+Conclusão: Como o p-valor é maior que 5% (pré-estabelecido), não há evidências para rejeitar $H_0$, ou seja, os redimentos medianos para os dois tipos de semente são iguais.
+
+## Para $n > 20$
+
+Amostra grande: Os dados fazem parte de um estudo que foi planejado para medir o efeito doméstico na inteligência (QI). Assim, o estudo foi desenvolvido com dois grupos de sujeitos: Grupo I formado da população criada por seus pais biológicos e o Grupo II formado pela população criada por outra pessoa. Porém, este tipo de estudo tem um fator de confundimento que pode ser causado pelas diferenças genéticas. Para eliminar esse fator, o teste foi aplicado em gêmeos idênticos sendo que um deles foi criado pelos pais biológicos e o outro por outra pessoa (segundo o estudo disponível em: https://bolt.mph.ufl.edu/6050-6052/unit-4b/module-13/paired-t-test/#iq, acesso em: 14/04/2021). Assim, foi feita a comparação dos escores do teste de QI de cada um deles. 
+
+
+Como no exemplo anterior para $n< 20$, será feito uma breve análise descritiva dos dados do teste de QI dos gêmeos.
+
+
+```r
+twins <- read_excel("dados/twins.xls")
+tw1 <- twins$TesteQi[twins$Twin == "Twin 1"]
+tw1
+```
+
+```
+## NULL
+```
+
+```r
+tw2 <- twins$TesteQi[twins$Twin == "Twin 2"]
+tw2
+```
+
+```
+## NULL
+```
+
+
+
+
+
+```r
+Tabela_1
+```
+
+```
+##         Mediana Media Desvio Padrão
+## Gêmeo 1    94.5 93.22         15.17
+## Gêmeo 2    98.0 96.12         13.85
+```
+
+
+```r
+Twins <- 
+  pivot_longer(twins, cols = c(`Twin 1`, `Twin 2`)) %>%
+	rename(Twin = name, TesteQi = value)
+
+ggplot(Twins, aes(x = Twin, y = TesteQi)) +
+  geom_boxplot() +
+  labs(x = "Gêmeos", y = "Resultado do teste de qi", title = "Boxplot para os resultados dos testes de qi dos gêmeos") +
+  theme_bw()
+```
+
+![](teste-de-wilcoxon-pareado_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+
+Com base no boxplot e nas estatísticas descritivas, percebe-se que o resultado mediano dos testes de QI dos gêmeos 1 é menor do que o resultado mediano dos testes de QI dos gêmeos 2. Assim, para ter certeza quanto a afirmativa será feito o teste.
+
+## Teste de Hipóteses
+
+As hipóteses são:
+
+\begin{align*}
+H_0 &: \mbox{O resultado mediano do teste de QI do gêmeo 1 é igual ao resultado mediano do teste de qi do gêmeo 2} \\
+H_1 &: \mbox{O resultado mediano do teste de QI do gêmeo 1 é menor que o resultado mediano do teste de QI do gêmeo 2}
+\end{align*}
+
+Usando o mesmo comando do exemplo anterior vamos rodar o teste para os dados dos gêmeos.
+  
+Obs.: Neste caso os dados com o tratamento é os dados dos gêmeos que foram criados por pais adotivos.
+
+
+```r
+teste <- wilcox.test(TesteQi ~ Twin, data = Twins, paired = T, alternative = "less", conf.level = 0.95, correct = T, exact = F)
+teste
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  TesteQi by Twin
+## V = 159.5, p-value = 0.04216
+## alternative hypothesis: true location shift is less than 0
+```
+
+Conclusão: como o p-valor é menor que 5% (pré-estabelecido no R) há evidências para rejeitar $H_0$, ou seja, o resultado mediano do teste de QI do gêmeo 1 é menor que o resultado do gêmeo 2.
+
+# Referências
+
+RAMOS, Iloneide Carlos de Oliveira. FREIRE, Flávio Henrique Miranda de Araújo. BARBOSA, Denize Araújo. Estatística não-paramétrica utilizando o R. Natal, julho de 2018.
+
+Paired Samples. Disponível em :https://bolt.mph.ufl.edu/6050-6052/unit-4b/module-13/paired-t-test/#iq. Acesso em: 14/04/2021.
+
+R Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna,
+  Austria. URL https://www.R-project.org/

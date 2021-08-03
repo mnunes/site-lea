@@ -73,8 +73,8 @@ Amostra pequena: Os dados a seguir fazem parte de uma amostra de tamanho $n = 11
 ```r
 # importando os dados
 
-library(readxl)
-seed <- read_excel("dados/seed.xls")
+library(rio)
+seed <- import(file = "http://lea.estatistica.ccet.ufrn.br/tutoriais/dados/seed.xls")
 
 dados_seed <-  dados <- data.frame(Semente = c(rep("Normal", 11), rep("Seco",11)),Rendimento = c(seed$`Regular seed`,seed$`Kiln-dried seed`))
 
@@ -162,14 +162,14 @@ Conclusão: Como o p-valor é maior que 5% (pré-estabelecido), não há evidên
 
 ## Para $n > 20$
 
-Amostra grande: Os dados fazem parte de um estudo que foi planejado para medir o efeito doméstico na inteligência (QI). Assim, o estudo foi desenvolvido com dois grupos de sujeitos: Grupo I formado da população criada por seus pais biológicos e o Grupo II formado pela população criada por outra pessoa. Porém, este tipo de estudo tem um fator de confundimento que pode ser causado pelas diferenças genéticas. Para eliminar esse fator, o teste foi aplicado em gêmeos idênticos sendo que um deles foi criado pelos pais biológicos e o outro por outra pessoa (segundo o estudo disponível em: https://bolt.mph.ufl.edu/6050-6052/unit-4b/module-13/paired-t-test/#iq, acesso em: 14/04/2021). Assim, foi feita a comparação dos escores do teste de QI de cada um deles. 
+Amostra grande: Os dados fazem parte de um estudo que foi planejado para medir o efeito doméstico no quociente de inteligência (QI). Assim, o estudo foi desenvolvido com dois grupos de sujeitos: Grupo I formado da população criada por seus pais biológicos e o Grupo II formado pela população criada por outra pessoa. Porém, este tipo de estudo tem um fator de confundimento que pode ser causado pelas diferenças genéticas. Para eliminar esse fator, o teste foi aplicado em gêmeos idênticos sendo que um deles foi criado pelos pais biológicos e o outro por outra pessoa (segundo o estudo disponível em: https://bolt.mph.ufl.edu/6050-6052/unit-4b/module-13/paired-t-test/#iq, acesso em: 14/04/2021). Assim, foi feita a comparação dos escores do teste de QI de cada um deles. 
 
 
 Como no exemplo anterior para $n< 20$, será feito uma breve análise descritiva dos dados do teste de QI dos gêmeos.
 
 
 ```r
-twins <- read_excel("dados/twins.xls")
+twins <- import(file = "http://lea.estatistica.ccet.ufrn.br/tutoriais/dados/twins.xls")
 tw1 <- twins$TesteQi[twins$Twin == "Twin 1"]
 tw1
 ```
@@ -209,7 +209,7 @@ Twins <-
 
 ggplot(Twins, aes(x = Twin, y = TesteQi)) +
   geom_boxplot() +
-  labs(x = "Gêmeos", y = "Resultado do teste de qi", title = "Boxplot para os resultados dos testes de qi dos gêmeos") +
+  labs(x = "Gêmeos", y = "Resultado do teste de QI", title = "Boxplot para os resultados dos testes de QI dos gêmeos") +
   theme_bw()
 ```
 
@@ -223,7 +223,7 @@ Com base no boxplot e nas estatísticas descritivas, percebe-se que o resultado 
 As hipóteses são:
 
 \begin{align*}
-H_0 &: \mbox{O resultado mediano do teste de QI do gêmeo 1 é igual ao resultado mediano do teste de qi do gêmeo 2} \\
+H_0 &: \mbox{O resultado mediano do teste de QI do gêmeo 1 é igual ao resultado mediano do teste de QI do gêmeo 2} \\
 H_1 &: \mbox{O resultado mediano do teste de QI do gêmeo 1 é menor que o resultado mediano do teste de QI do gêmeo 2}
 \end{align*}
 

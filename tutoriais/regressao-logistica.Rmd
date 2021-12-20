@@ -5,7 +5,7 @@ date: "5 de Julho de 2021"
 header-includes:
     - \usepackage{bm}
     - \usepackage{float}
-bibliography: book.bib
+bibliography: regressao_logistica.bib
 output: 
   bookdown::html_document2:
     keep_md: true

@@ -1,0 +1,225 @@
+---
+title: "Tutorial R - Teste de Kruskal-Walllis"
+author: |
+  | Elizabeth do Nascimento Palhano
+  | João Victor Moraes Cavalcante
+  | Orientadora: Denize Araújo Barbosa
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+
+bibliography: kruskal_wallis.bib
+
+nocite: '@*'
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, fig.align = 'c')
+library(tidyverse)
+theme_set(theme_minimal())
+
+```
+
+# Introdução 
+
+Criado por William Kruskal e W. Allen Wallis, o teste de Kruskal-Wallis é utilizado em situações onde queremos comparar mais de dois grupos independentes, de tamanhos iguais ou não, com variável resposta quantitativa. O teste é uma alternativa quando os pressupostos necesários pelo teste F da Análise de Variância não são atendidos, tendo em vista que o teste de Kruskal-Wallis dispensa a pressuposição de normalidade e homocedasticidade. No teste de Kruskal-Wallis, é testado se $k$ amostras vêm de uma mesma população, ou se pelo menos uma delas vêm de população distinta das demais.
+
+# Procedimento
+
+\justifying Inicialmente ordena-se de forma crescente as $n$ observações para cada coluna (grupo) da amostra, em seguida, atribui-se um posto para cada uma das $n$ observações. Isto é, todos os escores de todas as $k$ amostras combinadas são dispostos em uma única série de postos. Ao menor escore atribui-se o posto 1, ao seguinte o posto 2 e assim sucessivamente até o maior posto, que é $n$, onde $n$ = número total de observações independentes nas $k$ amostras. Havendo empates, cada escore recebe a média dos postos que deveriam receber se não houvesse empate. Feito isso, determina-se a soma dos postos em cada amostra.
+
+## Hipóteses: 
+
+$H_0$: As $k$ amostras são oriundas de uma mesma população.
+
+$H_1$: Pelo menos uma das amostras vêm de uma população distinta das demais.
+
+## Estatística do teste
+
+#### **Caso não ocorram empates:**
+
+$$H= \Bigg[ \frac{12}{n(n+1)} \sum_{i=1}^{k} \frac{R_i^2}{n_i} \Bigg] -3(n+1).$$
+
+Em que :
+
+$R_i$ é a soma dos postos do tratamento $i$;
+
+$n_i$ é o tamanho da amostra no tratamento $i$;
+
+$k$ é o número de amostras;
+
+$n = \sum_{i=1}^{k} n_i$ é número total de elementos em todas as amostras.
+
+####  **Caso ocorram empates:**
+
+Quando ocorrem empates, é necessário aplicar o fator de correção $c$ na fórmula de $H$:
+
+$$ c=1- \frac{\sum_{i=1}^{g}T_i}{n^{3}-n} .$$
+Em que: 
+$g$ é o número de grupos de empates;
+
+$T_i=t_i^{3}-t_i$;
+
+$t_i$ é o número de observações empatadas no grupo de empate $i$.
+
+
+Desse modo, a expressão para o cálculo de $H$ com a correção para empates é dada por:
+
+$$H_c= \frac{H}{c}.$$
+
+## Regra de Decisão
+
+Rejeitamos $H_0$ ao nível $\alpha$ se $H_c$ for maior que o quantil $1 − \alpha$ (dos valores tabelados ou da $X^{2}_{k-1}$).
+
+#### **Para amostras pequenas ($k = 3$ e os $n_i’s$ ≤ 6)**
+
+A distribuição exata de $H$ é tabelada (Siegel e Castellan Jr. 2006, p. 392) ou (Campos 1979, p. 318).
+
+#### **Para amostras grandes ($k > 3$ ou pelo menos um $n_i$ > 6)**
+
+$H$ ou $H_C$ tem distribuição aproximadamente qui-quadrado com $gl = k - 1$.
+
+## Comparações Múltiplas
+
+Se rejeitarmos a hipótese nula no teste de Kruskal-Wallis, é necessário realizar comparações múltiplas para detectar quais pares de populações podem ser considerados diferentes.
+
+#### **Para amostras pequenas com $n_i’s$  iguais**
+
+Calcula-se a diferença $|R_i -R_j|$ para cada par de tratamento. 
+
+Em que: $R_i$ e $R_j$ são as somas dos postos nos tratamentos $i$ e $j$, respectivamente.
+
+Em seguida, compara-se $|R_i -R_j|$ com o valor de $\Delta$ da tabela 16 do livro Estatística Experimental não paramétrica (Campos 1979).que representa: $P(|R_i -R_j|\ge \Delta)=\alpha$.  Se o valor de $\alpha$ for menor do que o nível de significância, rejeita-se a hipótese de que as duas amostras vêm da mesma distribuição.
+
+#### **Para amostras pequenas com $n_i’s$  diferentes**
+
+Calcula-se a diferença mínima significante (dms) para cada par de tratamento $i$ e $j$.
+
+$$ dms= \sqrt{\frac{n(n+1)}{12}(\frac{1}{n_i}+\frac{1}{n_j})h}.$$
+Em que :
+
+$h$ é o limite dado pela tabela 14 usada no teste de Kruskal-Wallis e que dependerá do nível de significância $\alpha$.
+
+Em seguida, calcula-se a diferença $|\bar{R_i} - \bar{R_j}|$, em que: 
+
+$$\bar{R_i}= \frac{R_i}{n_i}  \hspace{.5cm} \text{ e }\hspace{.5cm} \bar{R_j}= \frac{R_j}{n_j}.$$
+
+
+Se a diferença $|\bar{R_i} - \bar{R_j}| \ge dms$, rejeita-se a hipótese nula de que os tratamentos são iguais.
+
+#### **Para amostras grandes com $n_i’s$  iguais**
+
+Calcula-se a diferença mínima significante (dms) para cada par de tratamento $i$ e $j$.
+
+$$ dms= Q \sqrt{\frac{k(n+1)}{12}}.$$
+Em que:
+
+$Q$ é o limite dado pela tabela 17 do livro Estatística Experimental não paramétrica (Campos 1979).
+
+Em seguida, calcula-se a diferença $|\bar{R_i} - \bar{R_j}|$, em que: 
+
+*$\bar{R_i}= \frac{R_i}{n_i}$ e $\bar{R_j}= \frac{R_j}{n_j}$*
+
+
+Se a diferença $|\bar{R_i} - \bar{R_j}| \ge dms$, rejeita-se a hipótese nula de que os tratamentos são iguais.
+
+#### **Para amostras grandes com $n_i’s$  diferentes**
+
+Calcula-se a diferença mínima significante (dms) para cada par de tratamento $i$ e $j$.
+
+$$ dms= Z_{\frac{\alpha}{k(k-1)}} \sqrt{\frac{n(n+1)}{12}(\frac{1}{n_i}+\frac{1}{n_j})}.$$
+Em que:
+
+$Z_{\frac{\alpha}{k(k-1)}}$ é o valor da distribuição Normal encontrado na tabela.
+
+Em seguida, calcula-se a diferença $|\bar{R_i} - \bar{R_j}|$, em que:
+
+*$\bar{R_i}= \frac{R_i}{n_i}$ e $\bar{R_j}= \frac{R_j}{n_j}.$*
+
+
+Se a diferença $|\bar{R_i} - \bar{R_j}| \ge dms$, rejeita-se a hipótese nula de que os tratamentos são iguais.
+
+## Outras abordagens post-hoc
+
+Além dessas estatísticas vistas acima para encontrar os pares de grupos diferentes entre si, é possível utilizar outros métodos post-hoc, a depender do cenário em questão:
+
+* Teste de Dunn - Apropriado para grupos com tamanhos diferentes
+* Teste de Nemenyi - Apropriado para grupos com tamanhos iguais
+* Teste U de Mann-Whitney
+
+## Teste U de Mann-Whitney
+
+Caso a hipótese nula seja rejeitada no teste de Kruskall-Wallis, podemos realizar o teste U de Mann-Whitney/Wilcoxon-Mann-Whitney com os pares de grupos para identificar quais são diferentes entre si. Assim como no teste de Kruskall-Wallis, as amostras devem ser independentes entre si, a variável resposta deve ser ao menos ordinal, e sob a hipótese nula, as duas amostras estudadas vêm da mesma distribuição.
+
+### Estatística do teste
+
+A estatística de teste $U$ é dada pela seguinte fórmula
+
+\begin{align}
+  U_1 &= R_1 - \frac{n_1(n_1+1)}{2} \\
+  U_2 &= R_2 - \frac{n_2(n_2+1)}{2} \\ \\
+  U &= min\{U_1, U_2\}.
+\end{align}
+
+Em que $R_1, R_2, n_1, n_2$ são respectivamente, as somas dos postos dentro dos grupos 1 e 2, e os tamanhos amostrais dos grupos 1 e 2.
+
+Para amostras pequenas ($n_1,n_2 \leq 20$), os valores críticos da estatística U podem ser consultados em [tabelas específicas.](https://math.usask.ca/~laverty/S245/Tables/wmw.pdf)
+
+Se $U$ for menor do que o valor crítico tabelado, rejeita-se a hipótese nula.
+
+Com amostras grandes, a estatística U pode ser aproximada por uma distribuição normal, ao ser padronizada da seguinte forma:
+
+\begin{align}
+z = \frac{U-m_U}{\sigma_U}.
+\end{align}
+
+Em que $m_U$ e $\sigma_U$ são a média e desvio padrão da estatística U, respectivamente, definidos da seguinte forma:
+
+\begin{align}
+m_U &= \frac{n_1n_2}{2} \\
+\sigma_U &= \sqrt{\frac{n_1n_2(n_1+n_2+1)}{12}}.
+\end{align}
+
+## Uso no R
+
+Para realizar o teste de Kruskal-Wallis no R, basta utilizarmos a função `kruskal.test(x, g)`, onde x é a variável resposta de interesse e g os grupos das amostras. Também é possível especificar o teste da forma `kruskal.test(x ~ g)`. O conjunto de dados `airquality` será utilizado na análise, ele contém 153 observações de 6 variáveis sobre a qualidade do ar na cidade de Nova Iorque, de maio a setembro de 1973.
+
+
+### 
+
+```{r, fig.pos='c'}
+airquality %>% 
+  mutate(Month = as.factor(Month)) %>% 
+  ggplot() +
+  geom_boxplot(aes(y = Ozone, x = Month)) +
+  labs(x = 'Mês do ano', y = 'Concentração de ozônio', 
+       title = 'Concentração de Ozônio por mês') +
+  scale_x_discrete(labels = month.name[5:9])
+```
+
+Pelo box plot das concentrações de ozônio em cada mês, podemos ver que visualmente há uma diferença dos meses de julho e agosto comparados com os demais. Podemos verificar se essa diferença é significante com o teste de Kruskall-Wallis.
+
+```{r}
+kruskal.test(Ozone~Month, data = airquality)
+```
+
+Pelo valor da estatística do teste, rejeitamos a hipótese nula de que as concentrações de ozônio de cada mês vêm da mesma distribuição. Podemos em seguida fazer o teste U de Mann-Whitney para analisar quais pares são diferentes entre si:
+
+```{r}
+pairwise.wilcox.test(airquality$Ozone,
+                          airquality$Month,
+                          p.adjust.method="bonferroni")
+
+```
+
+Com o teste par-a-par, podemos ver que de fato as concentrações de ozônio dos meses 7 e 8 não vêm de distribuições diferentes. No entanto, quando comparados com outros meses, podemos ver que há diferença entre os meses 7 e 8 com o meses 5 e 9.
+
+## Referências
+
+\nocite{*}
